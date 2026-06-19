@@ -10,16 +10,31 @@ type Query {
     """Get user with their orders"""
     userWithOrders(id: Int!): UserWithOrders @field(resolver: "App\\GraphQL\\Queries\\UserQueries@userWithOrders")
 
+    """Get user order summary from Order Service"""
+    userOrderSummary(id: Int!): UserOrderSummary @field(resolver: "App\\GraphQL\\Queries\\UserQueries@userOrderSummary")
+
     """Login user"""
     login(email: String!, password: String!): AuthPayload @field(resolver: "App\\GraphQL\\Queries\\UserQueries@login")
+
+    """Get authenticated user by token"""
+    me(token: String!): User @field(resolver: "App\\GraphQL\\Queries\\UserQueries@me")
 }
 
 type Mutation {
+    """Register a new active user and return auth token"""
+    registerUser(name: String!, email: String!, password: String!): AuthPayload! @field(resolver: "App\\GraphQL\\Mutations\\UserMutations@registerUser")
+
     """Create a new user"""
-    createUser(name: String!, email: String!, password: String!): User! @field(resolver: "App\\GraphQL\\Mutations\\UserMutations@createUser")
+    createUser(name: String!, email: String!, password: String!, is_active: Boolean = true): User! @field(resolver: "App\\GraphQL\\Mutations\\UserMutations@createUser")
 
     """Update user"""
-    updateUser(id: Int!, name: String, email: String, password: String): User @field(resolver: "App\\GraphQL\\Mutations\\UserMutations@updateUser")
+    updateUser(id: Int!, name: String, email: String, password: String, is_active: Boolean): User @field(resolver: "App\\GraphQL\\Mutations\\UserMutations@updateUser")
+
+    """Activate or deactivate user account"""
+    updateUserStatus(id: Int!, is_active: Boolean!): User @field(resolver: "App\\GraphQL\\Mutations\\UserMutations@updateUserStatus")
+
+    """Logout user by revoking token"""
+    logout(token: String!): DeletePayload! @field(resolver: "App\\GraphQL\\Mutations\\UserMutations@logout")
 
     """Delete user"""
     deleteUser(id: Int!): DeletePayload! @field(resolver: "App\\GraphQL\\Mutations\\UserMutations@deleteUser")
@@ -30,6 +45,7 @@ type User {
     id: Int!
     name: String!
     email: String!
+    is_active: Boolean!
     created_at: String!
     updated_at: String!
 }
@@ -38,6 +54,31 @@ type User {
 type UserWithOrders {
     user: User!
     orders: [OrderData!]!
+}
+
+"""User order summary from Order Service"""
+type UserOrderSummary {
+    user: User!
+    summary: OrderSummary!
+}
+
+"""Aggregated order summary"""
+type OrderSummary {
+    total_orders: Int!
+    total_spent: Float!
+    average_order_value: Float!
+    active_orders: Int!
+    completed_orders: Int!
+    failed_orders: Int!
+    cancelled_orders: Int!
+    latest_order: OrderData
+    status_breakdown: [StatusCount!]!
+}
+
+"""Status count"""
+type StatusCount {
+    status: String!
+    count: Int!
 }
 
 """Paginated Users"""
@@ -52,6 +93,7 @@ type UserPaginated {
 type AuthPayload {
     user: User!
     token: String
+    token_type: String
 }
 
 """Delete Payload"""
@@ -64,10 +106,13 @@ type DeletePayload {
 type OrderData {
     id: Int!
     user_id: Int!
+    user_name: String
     food_id: Int!
     food_name: String!
+    unit_price: Float
     quantity: Int!
     total_price: Float!
     status: String!
     created_at: String!
+    updated_at: String
 }

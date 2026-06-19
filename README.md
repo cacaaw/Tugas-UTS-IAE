@@ -56,6 +56,27 @@ curl.exe http://localhost:8002/api/health
 curl.exe http://localhost:8003/api/health
 ```
 
+User Service auth dan summary:
+
+```powershell
+curl.exe -X POST http://localhost:8001/api/register `
+  -H "Accept: application/json" `
+  -d "name=Demo User" `
+  -d "email=demo@example.com" `
+  -d "password=password123"
+
+curl.exe http://localhost:8001/api/me `
+  -H "Accept: application/json" `
+  -H "Authorization: Bearer <token>"
+
+curl.exe http://localhost:8001/api/users/1/order-summary `
+  -H "Accept: application/json"
+
+curl.exe -X PATCH http://localhost:8001/api/users/1/status `
+  -H "Accept: application/json" `
+  -d "is_active=0"
+```
+
 Hasura Console:
 
 ```text

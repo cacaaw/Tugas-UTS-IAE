@@ -3,6 +3,8 @@
 namespace App\GraphQL\Queries;
 
 use App\Models\User;
+use App\Support\OrderSummary;
+use App\Support\UserToken;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 
@@ -45,21 +47,26 @@ class UserQueries
             return null;
         }
 
-        // Call Order Service to get user's orders
-        try {
-            $response = Http::timeout(5)->get(
-                rtrim(config('services.order_service.url'), '/') . '/api/orders',
-                ['user_id' => $user->id]
-            );
+        return [
+            'user' => $user,
+            'orders' => $this->ordersForUser($user->id),
+        ];
+    }
 
-            $orders = $response->successful() ? $response->json() : [];
-        } catch (\Exception $e) {
-            $orders = [];
+    /**
+     * Get user order summary from Order Service
+     */
+    public function userOrderSummary($rootValue, array $args)
+    {
+        $user = User::find($args['id']);
+
+        if (!$user) {
+            return null;
         }
 
         return [
             'user' => $user,
-            'orders' => $orders,
+            'summary' => OrderSummary::fromOrders($this->ordersForUser($user->id)),
         ];
     }
 
@@ -74,9 +81,51 @@ class UserQueries
             return null;
         }
 
+        if (!$user->is_active) {
+            return null;
+        }
+
         return [
             'user' => $user,
-            'token' => null, // Can integrate JWT if needed
+            'token' => UserToken::issue($user),
+            'token_type' => 'Bearer',
         ];
+    }
+
+    /**
+     * Get authenticated user by token
+     */
+    public function me($rootValue, array $args)
+    {
+        $user = UserToken::resolve($args['token']);
+
+        if (!$user || !$user->is_active) {
+            return null;
+        }
+
+        return $user;
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function ordersForUser(int $userId): array
+    {
+        try {
+            $response = Http::timeout(60)->get(
+                rtrim(config('services.order_service.url'), '/') . '/api/orders',
+                ['user_id' => $userId]
+            );
+        } catch (\Throwable) {
+            return [];
+        }
+
+        if (!$response->successful()) {
+            return [];
+        }
+
+        $orders = $response->json();
+
+        return is_array($orders) ? $orders : [];
     }
 }

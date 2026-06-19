@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Refy Karta',
                 'password' => Hash::make('password123'),
+                'is_active' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]
