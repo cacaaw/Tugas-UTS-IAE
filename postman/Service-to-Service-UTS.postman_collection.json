@@ -1,0 +1,781 @@
+{
+  "info": {
+    "name": "IAE Food Order - Docker PostgreSQL Hasura RabbitMQ",
+    "_postman_id": "8d0da8b8-707f-4db7-89c5-46e8ec70ec69",
+    "description": "Collection demo untuk project UTS IAE: Laravel microservices, PostgreSQL, Hasura auto-generated GraphQL, dan RabbitMQ async order processing.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "user_base_url",
+      "value": "http://127.0.0.1:8001"
+    },
+    {
+      "key": "food_base_url",
+      "value": "http://127.0.0.1:8002"
+    },
+    {
+      "key": "order_base_url",
+      "value": "http://127.0.0.1:8003"
+    },
+    {
+      "key": "hasura_url",
+      "value": "http://127.0.0.1:8081/v1/graphql"
+    },
+    {
+      "key": "hasura_admin_secret",
+      "value": "iae_admin"
+    },
+    {
+      "key": "rabbitmq_api_url",
+      "value": "http://127.0.0.1:15672/api"
+    },
+    {
+      "key": "rabbitmq_user",
+      "value": "iae"
+    },
+    {
+      "key": "rabbitmq_password",
+      "value": "iae"
+    },
+    {
+      "key": "user_id",
+      "value": "1"
+    },
+    {
+      "key": "food_id",
+      "value": "1"
+    },
+    {
+      "key": "order_id",
+      "value": "1"
+    },
+    {
+      "key": "postman_api_key",
+      "value": "{{postman_api_key}}"
+    }
+  ],
+  "item": [
+    {
+      "name": "00 - Health Checks",
+      "item": [
+        {
+          "name": "User Service Health",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{user_base_url}}/api/health",
+              "host": [
+                "{{user_base_url}}"
+              ],
+              "path": [
+                "api",
+                "health"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Food Service Health",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{food_base_url}}/api/health",
+              "host": [
+                "{{food_base_url}}"
+              ],
+              "path": [
+                "api",
+                "health"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Order Service Health",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{order_base_url}}/api/health",
+              "host": [
+                "{{order_base_url}}"
+              ],
+              "path": [
+                "api",
+                "health"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 - Laravel REST APIs",
+      "item": [
+        {
+          "name": "List Users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{user_base_url}}/api/users",
+              "host": [
+                "{{user_base_url}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{user_base_url}}/api/users/{{user_id}}",
+              "host": [
+                "{{user_base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{user_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login Seed User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{user_base_url}}/api/login",
+              "host": [
+                "{{user_base_url}}"
+              ],
+              "path": [
+                "api",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"refykarta@example.com\",\n  \"password\": \"password123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List Foods",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{food_base_url}}/api/foods",
+              "host": [
+                "{{food_base_url}}"
+              ],
+              "path": [
+                "api",
+                "foods"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Food By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{food_base_url}}/api/foods/{{food_id}}",
+              "host": [
+                "{{food_base_url}}"
+              ],
+              "path": [
+                "api",
+                "foods",
+                "{{food_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Orders",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{order_base_url}}/api/orders",
+              "host": [
+                "{{order_base_url}}"
+              ],
+              "path": [
+                "api",
+                "orders"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Order via REST Async",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 201', function () { pm.response.to.have.status(201); });",
+                  "const jsonData = pm.response.json();",
+                  "pm.test('Order starts as pending', function () { pm.expect(jsonData.status).to.eql('pending'); });",
+                  "if (jsonData.id) pm.collectionVariables.set('order_id', jsonData.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{order_base_url}}/api/orders",
+              "host": [
+                "{{order_base_url}}"
+              ],
+              "path": [
+                "api",
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": {{user_id}},\n  \"food_id\": {{food_id}},\n  \"quantity\": 2\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Order By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{order_base_url}}/api/orders/{{order_id}}",
+              "host": [
+                "{{order_base_url}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{order_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User Order History",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{user_base_url}}/api/users/{{user_id}}/orders",
+              "host": [
+                "{{user_base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{user_id}}",
+                "orders"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Laravel GraphQL Manual",
+      "item": [
+        {
+          "name": "User GraphQL - Users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{user_base_url}}/graphql",
+              "host": [
+                "{{user_base_url}}"
+              ],
+              "path": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query { users(first: 5) { data { id name email } total } }\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Food GraphQL - Foods",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{food_base_url}}/graphql",
+              "host": [
+                "{{food_base_url}}"
+              ],
+              "path": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query { foods(first: 5) { data { id name price qty } total } }\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Order GraphQL - Orders",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{order_base_url}}/graphql",
+              "host": [
+                "{{order_base_url}}"
+              ],
+              "path": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query { orders(first: 5) { data { id user_id food_id quantity total_price status } total } }\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Order GraphQL - Create Order Async",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{order_base_url}}/graphql",
+              "host": [
+                "{{order_base_url}}"
+              ],
+              "path": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"mutation { createOrder(user_id: 1, food_id: 1, quantity: 2) { success message error order { id quantity total_price status } } }\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Hasura Auto GraphQL PostgreSQL",
+      "item": [
+        {
+          "name": "Hasura - Read Users Foods Orders",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-hasura-admin-secret",
+                "value": "{{hasura_admin_secret}}"
+              }
+            ],
+            "url": {
+              "raw": "{{hasura_url}}",
+              "host": [
+                "{{hasura_url}}"
+              ],
+              "path": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query { users(limit: 5) { id name email } foods(limit: 5) { id name price qty } orders(limit: 5) { id user_id food_id quantity total_price status } }\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Hasura - Check Order Created and Stock",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-hasura-admin-secret",
+                "value": "{{hasura_admin_secret}}"
+              }
+            ],
+            "url": {
+              "raw": "{{hasura_url}}",
+              "host": [
+                "{{hasura_url}}"
+              ],
+              "path": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query { orders(limit: 5, order_by: {id: desc}) { id quantity total_price status } foods(where: {id: {_eq: 1}}) { id name qty } }\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - RabbitMQ Management API",
+      "item": [
+        {
+          "name": "Get iae_orders Queue Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{rabbitmq_api_url}}/queues/%2F/iae_orders",
+              "host": [
+                "{{rabbitmq_api_url}}"
+              ],
+              "path": [
+                "queues",
+                "%2F",
+                "iae_orders"
+              ]
+            },
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{rabbitmq_user}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{rabbitmq_password}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Postman API Key Check",
+      "item": [
+        {
+          "name": "Validate Postman API Key",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Postman API key is valid', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Api-Key",
+                "value": "{{postman_api_key}}"
+              }
+            ],
+            "url": {
+              "raw": "https://api.getpostman.com/me",
+              "protocol": "https",
+              "host": [
+                "api",
+                "getpostman",
+                "com"
+              ],
+              "path": [
+                "me"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

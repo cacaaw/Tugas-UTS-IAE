@@ -1,0 +1,7 @@
+Nama Kelompok: [Isi Nama Kelompok]
+Nama Anggota dan NIM:
+1. [Nama Anggota 1] - [NIM 1]
+2. [Nama Anggota 2] - [NIM 2]
+3. [Nama Anggota 3] - [NIM 3]
+
+Link Video Demo: [Isi Link Video]

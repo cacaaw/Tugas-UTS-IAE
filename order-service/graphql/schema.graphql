@@ -1,0 +1,100 @@
+# Order Service GraphQL Schema
+
+type Query {
+    """Get all orders (paginated)"""
+    orders(first: Int = 15, page: Int = 1, status: String, user_id: Int): OrderPaginated! @field(resolver: "App\\GraphQL\\Queries\\OrderQueries@orders")
+
+    """Get a single order by ID"""
+    order(id: Int!): Order @field(resolver: "App\\GraphQL\\Queries\\OrderQueries@order")
+
+    """Get orders by user ID"""
+    ordersByUser(user_id: Int!): [Order!]! @field(resolver: "App\\GraphQL\\Queries\\OrderQueries@ordersByUser")
+
+    """Get order statistics"""
+    orderStats: OrderStats! @field(resolver: "App\\GraphQL\\Queries\\OrderQueries@orderStats")
+
+    """Get service health status"""
+    serviceHealth: ServiceHealth! @field(resolver: "App\\GraphQL\\Queries\\OrderQueries@serviceHealth")
+}
+
+type Mutation {
+    """Create a new order"""
+    createOrder(user_id: Int!, food_id: Int!, quantity: Int!): OrderResult! @field(resolver: "App\\GraphQL\\Mutations\\OrderMutations@createOrder")
+
+    """Update order status"""
+    updateOrderStatus(id: Int!, status: String!): Order @field(resolver: "App\\GraphQL\\Mutations\\OrderMutations@updateOrderStatus")
+
+    """Update order"""
+    updateOrder(id: Int!, user_id: Int, food_id: Int, quantity: Int, status: String): Order @field(resolver: "App\\GraphQL\\Mutations\\OrderMutations@updateOrder")
+
+    """Delete order"""
+    deleteOrder(id: Int!): DeletePayload! @field(resolver: "App\\GraphQL\\Mutations\\OrderMutations@deleteOrder")
+
+    """Retry processing order (if failed)"""
+    retryOrder(id: Int!): OrderResult! @field(resolver: "App\\GraphQL\\Mutations\\OrderMutations@retryOrder")
+}
+
+"""Order type"""
+type Order {
+    id: Int!
+    user_id: Int!
+    user_name: String!
+    food_id: Int!
+    food_name: String!
+    unit_price: Float!
+    quantity: Int!
+    total_price: Float!
+    status: String!
+    created_at: String!
+    updated_at: String!
+}
+
+"""Paginated Orders"""
+type OrderPaginated {
+    data: [Order!]!
+    current_page: Int!
+    per_page: Int!
+    total: Int!
+}
+
+"""Order Result (with error handling)"""
+type OrderResult {
+    success: Boolean!
+    order: Order
+    message: String!
+    error: String
+}
+
+"""Order Statistics"""
+type OrderStats {
+    total_orders: Int!
+    total_revenue: Float!
+    average_order_value: Float!
+    unique_users: Int!
+    status_breakdown: [StatusCount!]!
+}
+
+"""Status Count"""
+type StatusCount {
+    status: String!
+    count: Int!
+}
+
+"""Service Health Status"""
+type ServiceHealth {
+    user_service: ServiceStatus!
+    food_service: ServiceStatus!
+    queue_status: String!
+}
+
+"""Service Status"""
+type ServiceStatus {
+    status: String!
+    message: String!
+}
+
+"""Delete Payload"""
+type DeletePayload {
+    success: Boolean!
+    message: String!
+}

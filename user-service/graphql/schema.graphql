@@ -1,0 +1,73 @@
+# User Service GraphQL Schema
+
+type Query {
+    """Get all users (paginated)"""
+    users(first: Int = 15, page: Int = 1): UserPaginated! @field(resolver: "App\\GraphQL\\Queries\\UserQueries@users")
+
+    """Get a single user by ID"""
+    user(id: Int!): User @field(resolver: "App\\GraphQL\\Queries\\UserQueries@user")
+
+    """Get user with their orders"""
+    userWithOrders(id: Int!): UserWithOrders @field(resolver: "App\\GraphQL\\Queries\\UserQueries@userWithOrders")
+
+    """Login user"""
+    login(email: String!, password: String!): AuthPayload @field(resolver: "App\\GraphQL\\Queries\\UserQueries@login")
+}
+
+type Mutation {
+    """Create a new user"""
+    createUser(name: String!, email: String!, password: String!): User! @field(resolver: "App\\GraphQL\\Mutations\\UserMutations@createUser")
+
+    """Update user"""
+    updateUser(id: Int!, name: String, email: String, password: String): User @field(resolver: "App\\GraphQL\\Mutations\\UserMutations@updateUser")
+
+    """Delete user"""
+    deleteUser(id: Int!): DeletePayload! @field(resolver: "App\\GraphQL\\Mutations\\UserMutations@deleteUser")
+}
+
+"""User type"""
+type User {
+    id: Int!
+    name: String!
+    email: String!
+    created_at: String!
+    updated_at: String!
+}
+
+"""User with Orders (joined data from Order Service)"""
+type UserWithOrders {
+    user: User!
+    orders: [OrderData!]!
+}
+
+"""Paginated Users"""
+type UserPaginated {
+    data: [User!]!
+    current_page: Int!
+    per_page: Int!
+    total: Int!
+}
+
+"""Authentication Payload"""
+type AuthPayload {
+    user: User!
+    token: String
+}
+
+"""Delete Payload"""
+type DeletePayload {
+    success: Boolean!
+    message: String!
+}
+
+"""Order Data (for user's orders - from Order Service)"""
+type OrderData {
+    id: Int!
+    user_id: Int!
+    food_id: Int!
+    food_name: String!
+    quantity: Int!
+    total_price: Float!
+    status: String!
+    created_at: String!
+}

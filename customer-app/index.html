@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Ordering App</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="noise-overlay"></div>
+    
+    <div class="app-container">
+        <!-- Auth View -->
+        <div id="auth-view" class="view active">
+            <div class="auth-box">
+                <button id="theme-toggle-auth" class="btn-theme auth-theme-toggle" title="Toggle Theme">
+                    <span class="theme-icon">🌙</span>
+                </button>
+                <div class="brand">
+                    <h1>Ops<span>Food</span></h1>
+                    <p id="auth-subtitle">Enter your details to order.</p>
+                </div>
+                <form id="login-form">
+                    <div class="input-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" required placeholder="refykarta@example.com" value="refykarta@example.com">
+                    </div>
+                    <div class="input-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" required placeholder="••••••••" value="password123">
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="login-btn">
+                        <span>Sign In</span>
+                    </button>
+                    <div id="login-error" class="error-msg"></div>
+                    <p class="auth-switch">Don't have an account? <a href="#" id="show-register">Register here</a></p>
+                </form>
+
+                <form id="register-form" style="display: none;">
+                    <div class="input-group">
+                        <label for="reg-name">Name</label>
+                        <input type="text" id="reg-name" required placeholder="John Doe">
+                    </div>
+                    <div class="input-group">
+                        <label for="reg-email">Email</label>
+                        <input type="email" id="reg-email" required placeholder="john@example.com">
+                    </div>
+                    <div class="input-group">
+                        <label for="reg-password">Password</label>
+                        <input type="password" id="reg-password" required placeholder="••••••••" minlength="6">
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="register-btn">
+                        <span>Register</span>
+                    </button>
+                    <div id="register-error" class="error-msg"></div>
+                    <p class="auth-switch">Already have an account? <a href="#" id="show-login">Login here</a></p>
+                </form>
+            </div>
+        </div>
+
+        <!-- Main View -->
+        <div id="main-view" class="view">
+            <nav class="navbar">
+                <div class="brand-small">Ops<span>Food</span></div>
+                <div class="nav-actions">
+                    <button id="theme-toggle" class="btn-theme" title="Toggle Theme">
+                        <span class="theme-icon">🌙</span>
+                    </button>
+                    <span id="user-greeting">Hi, User</span>
+                    <button id="btn-menu" class="btn-nav active">Menu</button>
+                    <button id="btn-history" class="btn-nav">History</button>
+                    <button id="btn-logout" class="btn-outline">Logout</button>
+                </div>
+            </nav>
+
+            <main class="content">
+                <!-- Menu Section -->
+                <section id="menu-section" class="section active">
+                    <div class="section-header">
+                        <h2>Our Menu</h2>
+                        <p>Discover our delicious foods.</p>
+                    </div>
+                    <div id="food-grid" class="food-grid">
+                        <!-- Foods will be rendered here -->
+                    </div>
+                </section>
+
+                <!-- History Section -->
+                <section id="history-section" class="section">
+                    <div class="section-header">
+                        <h2>Order History</h2>
+                        <p>Your previous orders.</p>
+                    </div>
+                    <div class="history-list">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Food</th>
+                                    <th>Qty</th>
+                                    <th>Total Price</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-table-body">
+                                <!-- Order history will be rendered here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Order Modal -->
+    <div id="order-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Place Order</h3>
+                <button class="btn-close" id="close-modal">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <div class="order-preview">
+                    <img id="order-img" src="" alt="">
+                    <div class="order-details">
+                        <h4 id="order-food-name">Food Name</h4>
+                        <p id="order-food-price">Rp 0</p>
+                    </div>
+                </div>
+                <form id="order-form">
+                    <input type="hidden" id="order-food-id">
+                    <div class="input-group">
+                        <label for="order-qty">Quantity</label>
+                        <input type="number" id="order-qty" value="1" min="1" required>
+                    </div>
+                    <div class="order-total">
+                        <span>Total:</span>
+                        <strong id="order-total-price">Rp 0</strong>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100" id="submit-order-btn">Confirm Order</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

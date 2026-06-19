@@ -1,0 +1,65 @@
+# Food Service GraphQL Schema
+
+type Query {
+    """Get all foods (paginated)"""
+    foods(first: Int = 15, page: Int = 1): FoodPaginated! @field(resolver: "App\\GraphQL\\Queries\\FoodQueries@foods")
+
+    """Get a single food by ID"""
+    food(id: Int!): Food @field(resolver: "App\\GraphQL\\Queries\\FoodQueries@food")
+
+    """Get foods with low stock"""
+    lowStockFoods(threshold: Int = 10): [Food!]! @field(resolver: "App\\GraphQL\\Queries\\FoodQueries@lowStockFoods")
+
+    """Search foods by name"""
+    searchFoods(query: String!): [Food!]! @field(resolver: "App\\GraphQL\\Queries\\FoodQueries@searchFoods")
+}
+
+type Mutation {
+    """Create a new food"""
+    createFood(name: String!, description: String, price: Float!, image: String, qty: Int!): Food! @field(resolver: "App\\GraphQL\\Mutations\\FoodMutations@createFood")
+
+    """Update food"""
+    updateFood(id: Int!, name: String, description: String, price: Float, image: String, qty: Int): Food @field(resolver: "App\\GraphQL\\Mutations\\FoodMutations@updateFood")
+
+    """Update food stock/quantity"""
+    updateFoodQuantity(id: Int!, qty: Int!): Food @field(resolver: "App\\GraphQL\\Mutations\\FoodMutations@updateFoodQuantity")
+
+    """Delete food"""
+    deleteFood(id: Int!): DeletePayload! @field(resolver: "App\\GraphQL\\Mutations\\FoodMutations@deleteFood")
+
+    """Deduct food stock (called by Order Service after order)"""
+    deductStock(id: Int!, quantity: Int!): StockDeductPayload! @field(resolver: "App\\GraphQL\\Mutations\\FoodMutations@deductStock")
+}
+
+"""Food type"""
+type Food {
+    id: Int!
+    name: String!
+    description: String
+    price: Float!
+    image: String
+    qty: Int!
+    created_at: String!
+    updated_at: String!
+}
+
+"""Paginated Foods"""
+type FoodPaginated {
+    data: [Food!]!
+    current_page: Int!
+    per_page: Int!
+    total: Int!
+}
+
+"""Stock Deduction Payload"""
+type StockDeductPayload {
+    success: Boolean!
+    food: Food
+    message: String!
+}
+
+"""Delete Payload"""
+type DeletePayload {
+    success: Boolean!
+    message: String!
+}

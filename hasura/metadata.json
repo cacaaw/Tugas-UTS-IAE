@@ -1,0 +1,74 @@
+{
+  "type": "replace_metadata",
+  "args": {
+    "metadata": {
+      "version": 3,
+      "sources": [
+        {
+          "name": "user_db",
+          "kind": "postgres",
+          "configuration": {
+            "connection_info": {
+              "database_url": {
+                "from_env": "USER_DATABASE_URL"
+              },
+              "isolation_level": "read-committed",
+              "use_prepared_statements": true
+            }
+          },
+          "tables": [
+            {
+              "table": {
+                "schema": "public",
+                "name": "users"
+              }
+            }
+          ]
+        },
+        {
+          "name": "food_db",
+          "kind": "postgres",
+          "configuration": {
+            "connection_info": {
+              "database_url": {
+                "from_env": "FOOD_DATABASE_URL"
+              },
+              "isolation_level": "read-committed",
+              "use_prepared_statements": true
+            }
+          },
+          "tables": [
+            {
+              "table": {
+                "schema": "public",
+                "name": "foods"
+              }
+            }
+          ]
+        },
+        {
+          "name": "order_db",
+          "kind": "postgres",
+          "configuration": {
+            "connection_info": {
+              "database_url": {
+                "from_env": "ORDER_DATABASE_URL"
+              },
+              "isolation_level": "read-committed",
+              "use_prepared_statements": true
+            }
+          },
+          "tables": [
+            {
+              "table": {
+                "schema": "public",
+                "name": "orders"
+              }
+            }
+          ]
+        }
+      ],
+      "remote_schemas": []
+    }
+  }
+}

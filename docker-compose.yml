@@ -1,0 +1,282 @@
+services:
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    container_name: iae-user-service
+    ports:
+      - "8001:8000"
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      CACHE_STORE: file
+      SESSION_DRIVER: file
+      DB_CONNECTION: pgsql
+      DB_HOST: user-db
+      DB_PORT: 5432
+      DB_DATABASE: user_db
+      DB_USERNAME: iae
+      DB_PASSWORD: iae
+      FOOD_SERVICE_URL: http://food-service:8000
+      ORDER_SERVICE_URL: http://order-service:8000
+      QUEUE_CONNECTION: sync
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: iae
+      RABBITMQ_PASSWORD: iae
+      RABBITMQ_QUEUE: iae_orders
+    volumes:
+      - ./user-service:/var/www/html
+    depends_on:
+      user-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  food-service:
+    build:
+      context: ./food-service
+      dockerfile: Dockerfile
+    container_name: iae-food-service
+    ports:
+      - "8002:8000"
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      CACHE_STORE: file
+      SESSION_DRIVER: file
+      DB_CONNECTION: pgsql
+      DB_HOST: food-db
+      DB_PORT: 5432
+      DB_DATABASE: food_db
+      DB_USERNAME: iae
+      DB_PASSWORD: iae
+      USER_SERVICE_URL: http://user-service:8000
+      ORDER_SERVICE_URL: http://order-service:8000
+      QUEUE_CONNECTION: sync
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: iae
+      RABBITMQ_PASSWORD: iae
+      RABBITMQ_QUEUE: iae_orders
+    volumes:
+      - ./food-service:/var/www/html
+    depends_on:
+      food-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  order-service:
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+    container_name: iae-order-service
+    ports:
+      - "8003:8000"
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      CACHE_STORE: file
+      SESSION_DRIVER: file
+      DB_CONNECTION: pgsql
+      DB_HOST: order-db
+      DB_PORT: 5432
+      DB_DATABASE: order_db
+      DB_USERNAME: iae
+      DB_PASSWORD: iae
+      USER_SERVICE_URL: http://user-service:8000
+      FOOD_SERVICE_URL: http://food-service:8000
+      QUEUE_CONNECTION: rabbitmq
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: iae
+      RABBITMQ_PASSWORD: iae
+      RABBITMQ_QUEUE: iae_orders
+    volumes:
+      - ./order-service:/var/www/html
+    depends_on:
+      order-db:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+      food-service:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+
+  order-worker:
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+    container_name: iae-order-worker
+    command: ["sh", "./start-worker.sh"]
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      CACHE_STORE: file
+      SESSION_DRIVER: file
+      DB_CONNECTION: pgsql
+      DB_HOST: order-db
+      DB_PORT: 5432
+      DB_DATABASE: order_db
+      DB_USERNAME: iae
+      DB_PASSWORD: iae
+      USER_SERVICE_URL: http://user-service:8000
+      FOOD_SERVICE_URL: http://food-service:8000
+      QUEUE_CONNECTION: rabbitmq
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: iae
+      RABBITMQ_PASSWORD: iae
+      RABBITMQ_QUEUE: iae_orders
+    volumes:
+      - ./order-service:/var/www/html
+    depends_on:
+      order-db:
+        condition: service_healthy
+      food-service:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+
+  user-db:
+    image: postgres:16-alpine
+    container_name: iae-user-db
+    environment:
+      POSTGRES_DB: user_db
+      POSTGRES_USER: iae
+      POSTGRES_PASSWORD: iae
+    ports:
+      - "5433:5432"
+    volumes:
+      - user-pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U iae -d user_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  food-db:
+    image: postgres:16-alpine
+    container_name: iae-food-db
+    environment:
+      POSTGRES_DB: food_db
+      POSTGRES_USER: iae
+      POSTGRES_PASSWORD: iae
+    ports:
+      - "5434:5432"
+    volumes:
+      - food-pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U iae -d food_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  order-db:
+    image: postgres:16-alpine
+    container_name: iae-order-db
+    environment:
+      POSTGRES_DB: order_db
+      POSTGRES_USER: iae
+      POSTGRES_PASSWORD: iae
+    ports:
+      - "5435:5432"
+    volumes:
+      - order-pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U iae -d order_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: iae-rabbitmq
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: iae
+      RABBITMQ_DEFAULT_PASS: iae
+      RABBITMQ_ERLANG_COOKIE: iae_rabbitmq_cookie
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    entrypoint: >
+      /bin/sh -c "
+      rm -f /var/lib/rabbitmq/.erlang.cookie;
+      rabbitmq-server
+      "
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  hasura-metadata-db:
+    image: postgres:16-alpine
+    container_name: iae-hasura-metadata-db
+    environment:
+      POSTGRES_DB: hasura_metadata
+      POSTGRES_USER: hasura
+      POSTGRES_PASSWORD: hasura
+    volumes:
+      - hasura-metadata-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hasura -d hasura_metadata"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  hasura:
+    image: hasura/graphql-engine:v2.45.1
+    container_name: iae-hasura
+    ports:
+      - "8081:8080"
+    environment:
+      HASURA_GRAPHQL_METADATA_DATABASE_URL: postgres://hasura:hasura@hasura-metadata-db:5432/hasura_metadata
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      HASURA_GRAPHQL_DEV_MODE: "true"
+      HASURA_GRAPHQL_ADMIN_SECRET: iae_admin
+      USER_DATABASE_URL: postgres://iae:iae@user-db:5432/user_db
+      FOOD_DATABASE_URL: postgres://iae:iae@food-db:5432/food_db
+      ORDER_DATABASE_URL: postgres://iae:iae@order-db:5432/order_db
+    depends_on:
+      hasura-metadata-db:
+        condition: service_healthy
+
+  hasura-init:
+    image: curlimages/curl:8.11.1
+    container_name: iae-hasura-init
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      'set -e;
+      urls="http://hasura:8080/healthz http://user-service:8000/api/health http://food-service:8000/api/health http://order-service:8000/api/health";
+      for url in $$urls; do
+        echo "Waiting for $$url...";
+        until curl -fsS "$$url" >/dev/null; do sleep 2; done;
+      done;
+      echo "Applying Hasura PostgreSQL metadata...";
+      curl -fsS -X POST http://hasura:8080/v1/metadata -H "Content-Type: application/json" -H "x-hasura-admin-secret: iae_admin" --data-binary @/hasura/metadata.json;
+      echo "Hasura metadata applied."'
+    volumes:
+      - ./hasura/metadata.json:/hasura/metadata.json:ro
+    depends_on:
+      hasura:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+      food-service:
+        condition: service_started
+      order-service:
+        condition: service_started
+    restart: "no"
+
+volumes:
+  user-pg-data:
+  food-pg-data:
+  order-pg-data:
+  rabbitmq-data:
+  hasura-metadata-data:
