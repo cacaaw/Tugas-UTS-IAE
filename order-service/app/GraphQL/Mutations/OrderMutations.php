@@ -84,7 +84,7 @@ class OrderMutations
             return [
                 'success' => false,
                 'order' => null,
-                'message' => 'Error creating order',
+                'message' => $e->getMessage(),
                 'error' => $e->getMessage(),
             ];
         }
