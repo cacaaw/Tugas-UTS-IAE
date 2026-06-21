@@ -10,6 +10,30 @@ RABBITMQ_HOST="${RABBITMQ_HOST:-rabbitmq}"
 RABBITMQ_PORT="${RABBITMQ_PORT:-5672}"
 RABBITMQ_QUEUE="${RABBITMQ_QUEUE:-iae_orders}"
 
+set_env_value() {
+  key="$1"
+  value="$2"
+
+  if [ -f .env ]; then
+    if grep -q "^${key}=" .env; then
+      sed -i "s|^${key}=.*|${key}=${value}|" .env
+    else
+      printf '\n%s=%s\n' "$key" "$value" >> .env
+    fi
+  fi
+}
+
+set_env_value DB_CONNECTION pgsql
+set_env_value DB_HOST "$DB_HOST"
+set_env_value DB_PORT "$DB_PORT"
+set_env_value DB_DATABASE "$DB_DATABASE"
+set_env_value DB_USERNAME "$DB_USERNAME"
+set_env_value DB_PASSWORD "$DB_PASSWORD"
+set_env_value QUEUE_CONNECTION rabbitmq
+set_env_value RABBITMQ_HOST "$RABBITMQ_HOST"
+set_env_value RABBITMQ_PORT "$RABBITMQ_PORT"
+set_env_value RABBITMQ_QUEUE "$RABBITMQ_QUEUE"
+
 echo "Waiting for order database at ${DB_HOST}:${DB_PORT}..."
 attempt=1
 while [ "$attempt" -le 60 ]; do

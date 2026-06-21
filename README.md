@@ -56,27 +56,6 @@ curl.exe http://localhost:8002/api/health
 curl.exe http://localhost:8003/api/health
 ```
 
-User Service auth dan summary:
-
-```powershell
-curl.exe -X POST http://localhost:8001/api/register `
-  -H "Accept: application/json" `
-  -d "name=Demo User" `
-  -d "email=demo@example.com" `
-  -d "password=password123"
-
-curl.exe http://localhost:8001/api/me `
-  -H "Accept: application/json" `
-  -H "Authorization: Bearer <token>"
-
-curl.exe http://localhost:8001/api/users/1/order-summary `
-  -H "Accept: application/json"
-
-curl.exe -X PATCH http://localhost:8001/api/users/1/status `
-  -H "Accept: application/json" `
-  -d "is_active=0"
-```
-
 Hasura Console:
 
 ```text
@@ -117,13 +96,11 @@ query {
 
 ## Demo RabbitMQ Async Order
 
-Gunakan Postman, Insomnia, atau GraphQL client lain untuk mengirim request POST ke GraphQL Order Service:
+Buka GraphQL Order Service:
 
 ```text
 http://localhost:8003/graphql
 ```
-
-Jangan membuka URL tersebut langsung di browser tanpa query, karena endpoint akan membalas error `GraphQL Request must include query`.
 
 Jalankan mutation:
 
@@ -170,6 +147,30 @@ Login:
 
 ```text
 iae / iae
+```
+
+## Food Service Stock API
+
+Food Service menyediakan endpoint stok khusus agar quantity tidak bisa menjadi negatif saat order diproses.
+
+```powershell
+curl.exe "http://localhost:8002/api/foods/1/stock?quantity=2"
+```
+
+Update stok:
+
+```powershell
+curl.exe -X PATCH http://localhost:8002/api/foods/1/stock `
+  -H "Content-Type: application/json" `
+  -d "{\"operation\":\"decrease\",\"quantity\":2}"
+```
+
+`operation` yang tersedia:
+
+```text
+increase
+decrease
+set
 ```
 
 ## Dokumentasi Tambahan

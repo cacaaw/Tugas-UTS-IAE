@@ -51,11 +51,20 @@ class ProcessOrder implements ShouldQueue
             return;
         }
 
-        // Deduct quantity in FoodService
-        $updateFoodResponse = Http::timeout(30)->put(
-            rtrim(config('services.food_service.url'), '/') . '/api/foods/' . $this->order->food_id,
-            ['qty' => $currentQty - $orderQty]
+        // Deduct quantity in FoodService using the stock endpoint so stock cannot go below zero.
+        $updateFoodResponse = Http::timeout(30)->patch(
+            rtrim(config('services.food_service.url'), '/') . '/api/foods/' . $this->order->food_id . '/stock',
+            [
+                'operation' => 'decrease',
+                'quantity' => $orderQty,
+            ]
         );
+
+        if ($updateFoodResponse->status() === 409) {
+            Log::warning('ProcessOrder: Insufficient food stock during deduction', ['order_id' => $this->order->id]);
+            $this->order->update(['status' => 'failed_insufficient_stock']);
+            return;
+        }
 
         if (! $updateFoodResponse->successful()) {
             Log::error('ProcessOrder: Failed to update food quantity in FoodService', ['order_id' => $this->order->id]);

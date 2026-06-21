@@ -11,6 +11,8 @@ Route::get('/health', function () {
 Route::get('/foods', [FoodController::class, 'index']);
 Route::post('/foods', [FoodController::class, 'store']);
 Route::get('/foods/{id}', [FoodController::class, 'show']);
+Route::get('/foods/{id}/stock', [FoodController::class, 'stock']);
+Route::patch('/foods/{id}/stock', [FoodController::class, 'updateStock']);
 Route::put('/foods/{id}', [FoodController::class, 'update']);
 Route::patch('/foods/{id}', [FoodController::class, 'update']);
 Route::delete('/foods/{id}', [FoodController::class, 'destroy']);

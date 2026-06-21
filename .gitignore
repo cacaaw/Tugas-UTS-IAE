@@ -11,9 +11,6 @@ node_modules/
 .DS_Store
 Thumbs.db
 
-# Local Postman secrets
-postman/*.local.postman_environment.json
-
 # Kubernetes manifests are currently outdated and still target MySQL.
 k8s/
 k8s_seed_all.ps1

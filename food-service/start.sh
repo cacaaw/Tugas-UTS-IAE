@@ -11,6 +11,26 @@ if [ ! -f .env ] && [ -f .env.example ]; then
   cp .env.example .env
 fi
 
+set_env_value() {
+  key="$1"
+  value="$2"
+
+  if [ -f .env ]; then
+    if grep -q "^${key}=" .env; then
+      sed -i "s|^${key}=.*|${key}=${value}|" .env
+    else
+      printf '\n%s=%s\n' "$key" "$value" >> .env
+    fi
+  fi
+}
+
+set_env_value DB_CONNECTION pgsql
+set_env_value DB_HOST "$DB_HOST"
+set_env_value DB_PORT "$DB_PORT"
+set_env_value DB_DATABASE "$DB_DATABASE"
+set_env_value DB_USERNAME "$DB_USERNAME"
+set_env_value DB_PASSWORD "$DB_PASSWORD"
+
 echo "Waiting for database at ${DB_HOST}:${DB_PORT}..."
 attempt=1
 while [ "$attempt" -le 60 ]; do
@@ -39,5 +59,13 @@ if [ -f .env ] && ! grep -q '^APP_KEY=base64:' .env; then
   php artisan key:generate --force || true
 fi
 
-php artisan migrate --force
+migration_status=0
+timeout 60s php artisan migrate --force || migration_status=$?
+if [ "$migration_status" -ne 0 ] && [ "$migration_status" -ne 124 ]; then
+  exit "$migration_status"
+fi
+if [ "$migration_status" -eq 124 ]; then
+  echo "Migration command timed out after applying available migrations; continuing startup."
+fi
+
 php artisan serve --host=0.0.0.0 --port=8000

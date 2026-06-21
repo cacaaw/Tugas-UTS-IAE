@@ -246,6 +246,17 @@ services:
     depends_on:
       hasura-metadata-db:
         condition: service_healthy
+      user-db:
+        condition: service_healthy
+      food-db:
+        condition: service_healthy
+      order-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/healthz >/dev/null || wget -q -O /dev/null http://localhost:8080/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   hasura-init:
     image: curlimages/curl:8.11.1

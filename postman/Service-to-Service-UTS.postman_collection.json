@@ -49,10 +49,6 @@
     {
       "key": "order_id",
       "value": "1"
-    },
-    {
-      "key": "postman_api_key",
-      "value": "{{postman_api_key}}"
     }
   ],
   "item": [
@@ -729,48 +725,6 @@
                   "value": "{{rabbitmq_password}}",
                   "type": "string"
                 }
-              ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "05 - Postman API Key Check",
-      "item": [
-        {
-          "name": "Validate Postman API Key",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Postman API key is valid', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "X-Api-Key",
-                "value": "{{postman_api_key}}"
-              }
-            ],
-            "url": {
-              "raw": "https://api.getpostman.com/me",
-              "protocol": "https",
-              "host": [
-                "api",
-                "getpostman",
-                "com"
-              ],
-              "path": [
-                "me"
               ]
             }
           }

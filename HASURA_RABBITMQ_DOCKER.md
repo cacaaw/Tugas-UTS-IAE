@@ -141,9 +141,7 @@ createOrder mutation
 -> order berubah menjadi created
 ```
 
-Contoh mutation ke endpoint `http://localhost:8003/graphql`:
-
-Gunakan Postman, Insomnia, atau GraphQL client lain. Jika URL `/graphql` dibuka langsung di browser tanpa query, respons error `GraphQL Request must include query` adalah normal.
+Contoh mutation di `http://localhost:8003/graphql`:
 
 ```graphql
 mutation {
